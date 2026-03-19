@@ -1,0 +1,50 @@
+# ============================================================
+# requirements.txt
+# All Python packages needed to run this project
+#
+# Install ALL of them with one command:
+#   pip install -r requirements.txt
+#
+# What each package does:
+# ============================================================
+
+# FastAPI - The web framework (like Django but simpler and faster)
+fastapi==0.104.1
+
+# Uvicorn - The server that RUNS your FastAPI app
+# (Like Apache/Nginx but for Python)
+uvicorn[standard]==0.24.0
+
+# Pydantic - Data validation (checks that inputs have right types)
+pydantic==2.5.0
+
+# Sentence Transformers - AI model for understanding text MEANING
+# (Downloads ~90MB model on first use - be patient!)
+sentence-transformers==2.2.2
+
+# Scikit-learn - Contains cosine_similarity function
+# (Also used for machine learning - very popular library)
+scikit-learn==1.3.2
+
+# NumPy - Fast math operations (needed by sentence-transformers)
+numpy==1.24.4
+
+# Redis - Python client for Redis cache
+# (The ACTUAL Redis server is separate - see README)
+# App works fine WITHOUT Redis installed - uses memory fallback
+redis==5.0.1
+
+# Python-dotenv - Load settings from .env files
+# (Keeps passwords/secrets out of code)
+python-dotenv==1.0.0
+
+# Httpx - For making HTTP requests (used in testing)
+httpx==0.25.2
+
+# ============================================================
+# OPTIONAL (for better performance):
+# ============================================================
+
+# Torch - Deep learning framework (sentence-transformers uses it)
+# Already installed by sentence-transformers
+# torch>=1.6.0  # (auto-installed by sentence-transformers)

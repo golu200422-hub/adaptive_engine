@@ -1,0 +1,89 @@
+# ============================================================
+# docker-compose.yml
+# Orchestrates multiple Docker containers together
+#
+# BEGINNER EXPLANATION:
+# =====================
+# If Dockerfile is a recipe for ONE dish (our Python app),
+# docker-compose.yml is the FULL MENU that combines multiple dishes.
+#
+# Our menu:
+# 1. 🐍 The FastAPI app (our Python code)
+# 2. 🔴 Redis (the fast cache)
+#
+# To start EVERYTHING with ONE command:
+#   docker compose up
+#
+# To stop everything:
+#   docker compose down
+# ============================================================
+
+version: '3.8'
+
+services:
+
+  # ---- SERVICE 1: Our Python FastAPI Application ----
+  api:
+    # Build from our Dockerfile in the current directory
+    build: .
+    
+    # Name this container
+    container_name: adaptive_engine_api
+    
+    # Map port 8000 on your computer → port 8000 in container
+    # Format: "your_computer_port:container_port"
+    ports:
+      - "8000:8000"
+    
+    # Environment variables (like .env file settings)
+    environment:
+      - REDIS_HOST=redis          # Redis hostname (matches service name below)
+      - REDIS_PORT=6379           # Redis port
+      - DATABASE_PATH=/data/adaptive_engine.db  # Database file location
+    
+    # Mount folders from your computer into the container
+    # Format: "./local_path:/container_path"
+    volumes:
+      - ./app:/app/app            # Code folder (changes reflect instantly!)
+      - app_data:/data            # Persistent data (database survives restarts)
+    
+    # Start after Redis is ready
+    depends_on:
+      - redis
+    
+    # Auto-restart if it crashes
+    restart: unless-stopped
+    
+    # Health check - Docker pings /health every 30 seconds
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ---- SERVICE 2: Redis Cache ----
+  redis:
+    # Use official Redis image from Docker Hub
+    # (No need to build - Docker downloads it automatically)
+    image: redis:7-alpine   # alpine = very small Linux image
+    
+    container_name: adaptive_engine_redis
+    
+    # Expose Redis port (for debugging tools like RedisInsight)
+    ports:
+      - "6379:6379"
+    
+    # Save Redis data to disk (persists across restarts)
+    command: redis-server --save 60 1 --loglevel warning
+    
+    volumes:
+      - redis_data:/data
+    
+    restart: unless-stopped
+
+# ---- NAMED VOLUMES ----
+# These are persistent storage areas managed by Docker
+# Data here SURVIVES when containers are stopped/restarted
+volumes:
+  app_data:       # Stores our SQLite database file
+  redis_data:     # Stores Redis data snapshots

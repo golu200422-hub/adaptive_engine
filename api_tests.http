@@ -1,0 +1,92 @@
+### ── Adaptive Engine API Tests ──────────────────────────────────────────
+### Run any request by clicking "Send Request" above it
+
+### 1. Health Check
+GET http://localhost:8000/health
+
+###
+
+### 2. Start Session
+POST http://localhost:8000/api/v1/session/start
+Content-Type: application/json
+
+{
+    "user_id": "student_001",
+    "starting_difficulty": 1
+}
+
+###
+
+### 3. Get Next Question  (paste your session_token below)
+GET http://localhost:8000/api/v1/question/next/PASTE_SESSION_TOKEN_HERE
+
+###
+
+### 4. Submit Answer
+POST http://localhost:8000/api/v1/answer/submit
+Content-Type: application/json
+
+{
+    "session_token": "PASTE_SESSION_TOKEN_HERE",
+    "question_id": 1,
+    "answer_text": "A variable is a named storage location in memory that holds a value which can change during program execution.",
+    "time_taken_seconds": 35.0,
+    "paste_detected": false
+}
+
+###
+
+### 5. Submit Suspicious Answer (triggers anti-cheat flags)
+POST http://localhost:8000/api/v1/answer/submit
+Content-Type: application/json
+
+{
+    "session_token": "PASTE_SESSION_TOKEN_HERE",
+    "question_id": 2,
+    "answer_text": "A list is mutable (changeable) and uses square brackets. A tuple is immutable (unchangeable) and uses parentheses. Lists support append, remove, sort. Tuples are faster and memory-efficient for fixed data.",
+    "time_taken_seconds": 0.8,
+    "paste_detected": true
+}
+
+###
+
+### 6. Security Report
+GET http://localhost:8000/api/v1/security/report/PASTE_SESSION_TOKEN_HERE
+
+###
+
+### 7. Difficulty Status
+GET http://localhost:8000/api/v1/difficulty/status/PASTE_SESSION_TOKEN_HERE
+
+###
+
+### 8. Answer History
+GET http://localhost:8000/api/v1/answer/history/PASTE_SESSION_TOKEN_HERE
+
+###
+
+### 9. List All Questions
+GET http://localhost:8000/api/v1/questions/list
+
+###
+
+### 10. List Easy Questions Only
+GET http://localhost:8000/api/v1/questions/list?difficulty=1
+
+###
+
+### 11. Add New Question
+POST http://localhost:8000/api/v1/question/add
+Content-Type: application/json
+
+{
+    "question_text": "What is the difference between a stack and a queue?",
+    "expected_answer": "A stack uses LIFO (Last In First Out) - the last item added is the first removed, like a stack of plates. A queue uses FIFO (First In First Out) - the first item added is first removed, like a queue of people.",
+    "difficulty_level": 2,
+    "topic": "data_structures"
+}
+
+###
+
+### 12. Cache / Redis Status
+GET http://localhost:8000/api/v1/cache/status

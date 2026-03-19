@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual Environment (never commit this!)
+venv/
+env/
+.venv/
+
+# Database files (contains real data - don't commit)
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment secrets (NEVER commit .env - contains passwords!)
+.env
+# But DO commit .env.example (it has no real secrets)
+
+# AI Model cache (large files, auto-downloaded)
+.cache/
+sentence_transformers/
+
+# Logs
+*.log
+logs/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store        # Mac
+Thumbs.db        # Windows
+desktop.ini      # Windows
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Docker volumes (managed by Docker, not git)
+docker-volumes/

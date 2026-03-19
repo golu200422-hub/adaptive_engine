@@ -1,0 +1,155 @@
+{
+  "info": {
+    "name": "Adaptive Difficulty Engine API",
+    "description": "Complete API collection for testing the Adaptive Difficulty & Anti-Cheat Engine.\n\nWORKFLOW:\n1. Run 'Start Session' first\n2. Copy the session_token from the response\n3. Update the {{session_token}} variable\n4. Get a question, submit an answer, check security report",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "description": "Change this if running on a different host/port"
+    },
+    {
+      "key": "session_token",
+      "value": "PASTE_YOUR_SESSION_TOKEN_HERE",
+      "description": "Copy from Start Session response"
+    },
+    {
+      "key": "question_id",
+      "value": "1",
+      "description": "Copy from Get Next Question response"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Health Check",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/health",
+        "description": "Check if server is running"
+      }
+    },
+    {
+      "name": "1. Start Session",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": "{{base_url}}/api/v1/session/start",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": \"student_001\",\n  \"starting_difficulty\": 1\n}"
+        },
+        "description": "FIRST STEP: Start a new quiz session.\nCopy the session_token from the response!"
+      }
+    },
+    {
+      "name": "2. Get Next Question",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/v1/question/next/{{session_token}}",
+        "description": "Get the next question for your session.\nReplace {{session_token}} with your actual token."
+      }
+    },
+    {
+      "name": "2b. Get Question (with topic filter)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/v1/question/next/{{session_token}}?topic=python",
+          "query": [{"key": "topic", "value": "python"}]
+        },
+        "description": "Get a question filtered by topic."
+      }
+    },
+    {
+      "name": "3. Submit Answer (Good - Normal Speed)",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": "{{base_url}}/api/v1/answer/submit",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"session_token\": \"{{session_token}}\",\n  \"question_id\": {{question_id}},\n  \"answer_text\": \"A variable is a named storage location in memory that holds a value which can change during program execution. Variables are used to store data that can be referenced and manipulated throughout a program.\",\n  \"time_taken_seconds\": 45.0,\n  \"paste_detected\": false\n}"
+        },
+        "description": "Submit a good answer at normal speed.\nExpected: Low risk score, decent similarity."
+      }
+    },
+    {
+      "name": "3b. Submit Answer (Suspicious - Too Fast)",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": "{{base_url}}/api/v1/answer/submit",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"session_token\": \"{{session_token}}\",\n  \"question_id\": {{question_id}},\n  \"answer_text\": \"A variable is a named storage location in memory that holds a value which can change during program execution. Variables have a name, type, and value.\",\n  \"time_taken_seconds\": 0.3,\n  \"paste_detected\": true\n}"
+        },
+        "description": "Submit with suspicious timing + paste detected.\nExpected: High risk score, multiple flags!"
+      }
+    },
+    {
+      "name": "4. Check Security Report",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/v1/security/report/{{session_token}}",
+        "description": "View the full anti-cheat report for the session."
+      }
+    },
+    {
+      "name": "5. Check Difficulty Status",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/v1/difficulty/status/{{session_token}}",
+        "description": "See current difficulty level and performance trend."
+      }
+    },
+    {
+      "name": "6. View Answer History",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/v1/answer/history/{{session_token}}",
+        "description": "See all answers submitted in this session."
+      }
+    },
+    {
+      "name": "7. List All Questions",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/v1/questions/list",
+        "description": "See all available questions."
+      }
+    },
+    {
+      "name": "7b. List Easy Questions",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/v1/questions/list?difficulty=1",
+          "query": [{"key": "difficulty", "value": "1"}]
+        }
+      }
+    },
+    {
+      "name": "8. Add New Question",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": "{{base_url}}/api/v1/question/add",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"question_text\": \"Explain the difference between a stack and a queue data structure.\",\n  \"expected_answer\": \"A stack follows LIFO (Last In First Out) order - the last item added is the first removed. Like a stack of plates. A queue follows FIFO (First In First Out) order - the first item added is the first removed. Like a line of people waiting.\",\n  \"difficulty_level\": 2,\n  \"topic\": \"data_structures\"\n}"
+        },
+        "description": "Add a new question to the system."
+      }
+    },
+    {
+      "name": "9. Cache Status",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/v1/cache/status",
+        "description": "Check if Redis is connected or using memory fallback."
+      }
+    }
+  ]
+}
