@@ -182,7 +182,7 @@ def analyze_semantic_similarity(
     return {
         "cosine_similarity": round(similarity_score, 4),
         "similarity_percentage": round(similarity_score * 100, 1),
-        "semantic_match": similarity_score >= 0.5,
+        "semantic_match": similarity_score >= 0.35,
         "match_level": match_level,
         "performance_label": performance_label,
         "key_concepts_found": found_concepts,
@@ -196,17 +196,17 @@ def _score_to_performance(score: float) -> Tuple[str, str]:
     Convert a numeric score to human-readable labels.
     
     Score ranges:
-    - 0.80 - 1.00: Excellent (knows the material very well)
-    - 0.60 - 0.79: Good (understands the core concepts)
-    - 0.40 - 0.59: Average (partial understanding)
-    - 0.20 - 0.39: Poor (limited understanding)
+    - 0.65 - 1.00: Excellent (knows the material very well)
+    - 0.50 - 0.64: Good (understands the core concepts, different wording OK)
+    - 0.35 - 0.49: Average (partial understanding)
+    - 0.20 - 0.34: Poor (limited understanding)
     - 0.00 - 0.19: Very Poor (off-topic or wrong)
     """
-    if score >= 0.80:
+    if score >= 0.65:
         return ("exact", "Excellent")
-    elif score >= 0.60:
+    elif score >= 0.50:
         return ("high", "Good")
-    elif score >= 0.40:
+    elif score >= 0.35:
         return ("medium", "Average")
     elif score >= 0.20:
         return ("low", "Poor")

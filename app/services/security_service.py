@@ -37,9 +37,10 @@ from app.models.database import get_connection
 logger = logging.getLogger(__name__)
 
 # ---- Configuration Constants ----
+# ---- Configuration Constants ----
 # Average human typing speed
 AVERAGE_TYPING_WPM = 40        # Words per minute (average)
-FAST_TYPING_WPM = 80           # Fast typist
+FAST_TYPING_WPM = 100          # Fast typist (was 80 - now realistic)
 MINIMUM_CHARS_PER_SECOND = 3   # Absolute minimum for any human
 
 # Risk score weights (how much each factor contributes)
@@ -49,7 +50,7 @@ WEIGHT_PERFORMANCE_SPIKE = 0.20  # 20% - Sudden performance improvements
 WEIGHT_PATTERN = 0.15          # 15% - Formatting/pattern analysis
 
 
-def analyze_timing(
+ddef analyze_timing(
     answer_text: str,
     time_taken_seconds: float,
     question_difficulty: int
@@ -76,7 +77,7 @@ def analyze_timing(
     
     # Minimum time to think about the question
     # Harder questions should take longer to think about
-    thinking_time = {1: 5, 2: 10, 3: 15}[question_difficulty]
+    thinking_time = {1: 3, 2: 7, 3: 12}[question_difficulty]
     
     # Minimum time to physically type the answer
     # Based on fast typing speed (generous)
@@ -91,24 +92,24 @@ def analyze_timing(
     flags = []
     timing_score = 0.0  # 0 = normal, 1 = very suspicious
     
-    # Check 1: Way too fast
-    if time_taken_seconds < expected_min_time * 0.3:
-        timing_score += 0.7
+    # Check 1: Way too fast (adjusted thresholds)
+    if time_taken_seconds < expected_min_time * 0.2:
+        timing_score += 0.5
         flags.append(f"⚡ Answer submitted in {time_taken_seconds:.1f}s (minimum expected: {expected_min_time:.1f}s)")
-    elif time_taken_seconds < expected_min_time * 0.5:
-        timing_score += 0.4
+    elif time_taken_seconds < expected_min_time * 0.4:
+        timing_score += 0.25
         flags.append(f"🚀 Suspiciously fast ({time_taken_seconds:.1f}s for {word_count} words)")
     elif time_taken_seconds < expected_min_time:
-        timing_score += 0.2
+        timing_score += 0.1
         flags.append(f"⏱️ Faster than expected ({time_taken_seconds:.1f}s vs min {expected_min_time:.1f}s)")
     
     # Check 2: Characters per second (physical typing limit)
     chars_per_second = char_count / max(time_taken_seconds, 0.1)
-    if chars_per_second > 30:  # 30 chars/sec = 360 wpm - impossible
-        timing_score = min(1.0, timing_score + 0.5)
+    if chars_per_second > 40:  # 40 chars/sec = 480 wpm - impossible
+        timing_score = min(1.0, timing_score + 0.4)
         flags.append(f"🔴 {chars_per_second:.0f} chars/second is physically impossible for human typing")
-    elif chars_per_second > 15:  # 15 chars/sec = 180 wpm - suspicious
-        timing_score = min(1.0, timing_score + 0.3)
+    elif chars_per_second > 20:  # 20 chars/sec = 240 wpm - suspicious
+        timing_score = min(1.0, timing_score + 0.15)
         flags.append(f"🟡 {chars_per_second:.0f} chars/second exceeds expert typing speed")
     
     return {
@@ -117,8 +118,8 @@ def analyze_timing(
         "expected_min_time": round(expected_min_time, 2),
         "expected_max_time": round(expected_max_time, 2),
         "chars_per_second": round(chars_per_second, 2),
-        "is_too_fast": timing_score >= 0.4,
-        "is_suspiciously_fast": timing_score >= 0.7,
+        "is_too_fast": timing_score >= 0.35,
+        "is_suspiciously_fast": timing_score >= 0.5,
         "timing_score": round(min(1.0, timing_score), 4),
         "flags": flags
     }
